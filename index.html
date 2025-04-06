@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido en tienda</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --verde-principal: #00c4b3;
+    }
+    body {
+      background: #f2f2f2;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding-bottom: 100px;
+      font-size: 18px;
+    }
+    /* CABECERA */
+    .header {
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header .icon {
+      font-size: 26px;
+      color: #333;
+      cursor: pointer;
+    }
+    /* Clase extra para agrandar el icono de recarga sin perder proporción */
+    .icon-refresh {
+      font-size: 30px;
+    }
+    @media (max-width: 480px) {
+      .icon-refresh {
+        font-size: 28px;
+      }
+    }
+    .header .title {
+      font-size: 20px;
+      font-weight: 400;
+      color: #000;
+      margin-left: 10px;
+    }
+    .form-check-input:checked {
+      background-color: var(--verde-principal);
+      border-color: var(--verde-principal);
+    }
+    /* CONTENEDOR GENERAL */
+    .container-custom {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* BLOQUE DEL RESTAURANTE */
+    .restaurant-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .restaurant-info img {
+      width: 90px;
+      height: auto;
+    }
+    .restaurant-details {
+      text-align: right;
+    }
+    .restaurant-details a {
+      font-size: 16px;
+      text-decoration: none;
+      color: var(--verde-principal);
+    }
+    /* "Retira el pedido" alineado a la izquierda en negrita */
+    .retira-pedido {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: left;
+    }
+    /* BLOQUE DE INFORMACIÓN DEL PEDIDO */
+    .pedido-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .pedido-id {
+      font-size: 18px;
+      color: #000;
+      margin-bottom: 6px;
+    }
+    .pedido-id strong {
+      font-weight: bold;
+    }
+    .pedido-nombre {
+      font-size: 18px;
+      color: #000;
+      margin-bottom: 10px;
+    }
+    .pedido-nombre strong {
+      font-weight: bold;
+    }
+    /* FILA CON "1 producto" y toggle */
+    .fila-producto {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .fila-producto .texto-producto {
+      font-size: 16px;
+      color: #777;
+    }
+    .fila-producto .toggle-details {
+      font-size: 16px;
+      color: var(--verde-principal);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    /* DETALLES DEL PEDIDO */
+    .details-content {
+      display: none;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+    .details-content.show {
+      display: block;
+    }
+    .details-content hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 8px 0;
+    }
+    .details-content .producto-principal {
+      margin-bottom: 6px;
+    }
+    .details-content .producto-secundario {
+      margin-left: 20px;
+      margin-bottom: 4px;
+    }
+    /* SEPARADOR visible sobre "Pedido en mano" */
+    .separador {
+      border: none;
+      border-top: 2px solid #ddd;
+      margin: 16px 0;
+    }
+    /* BLOQUE "PEDIDO EN MANO" */
+    .pedido-mano {
+      font-size: 18px;
+      color: #000;
+      font-weight: bold;
+      text-align: left;
+    }
+    .pedido-mano span {
+      display: block;
+      font-size: 16px;
+      color: #777;
+      font-weight: normal;
+    }
+    /* BOTÓN "TENGO EL PEDIDO" */
+    .btn-confirmar {
+      width: 100%;
+      margin-top: 12px;
+      background: var(--verde-principal);
+      color: #fff;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      padding: 14px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.2s, border 0.2s;
+    }
+    .btn-confirmar.pressed {
+      background: #fff;
+      border: 1px solid #000;
+      color: #000; /* Ahora la letra sale en negro */
+    }
+    /* HORA ACTUAL */
+    .footer-hora {
+      text-align: center;
+      color: #999;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    /* FOOTER FIJO (SLIDER) */
+    .footer-fixed {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #f9f9f9;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+    .slider-container {
+      flex-grow: 1;
+      margin-left: 20px;
+    }
+    .slider-track {
+      position: relative;
+      background: #e0e0e0;
+      border-radius: 25px;
+      height: 55px;
+      overflow: hidden;
+      user-select: none;
+    }
+    .slider-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: rgba(0, 196, 179, 0.6);
+      transition: background 0.3s, width 0.3s;
+    }
+    .slider-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      line-height: 55px;
+      color: #aaa;
+      font-weight: bold;
+      pointer-events: none;
+    }
+    .slider-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transition: color 0.3s;
+      color: #555;
+      font-size: 22px;
+      background: transparent;
+    }
+    .slider-track.success .slider-fill {
+      background: var(--verde-principal);
+      width: 100% !important;
+    }
+    .slider-track.success .slider-text,
+    .slider-track.success .slider-handle {
+      color: #fff;
+    }
+    /* OVERLAY DE CARGA */
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #loadingOverlay.active {
+      display: flex;
+    }
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: #555;
+    }
+    .loading-text {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <!-- OVERLAY DE CARGA -->
+  <div id="loadingOverlay">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <div class="loading-text">Cargando...</div>
+  </div>
+  <!-- CABECERA -->
+  <div class="header">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-list icon"></i>
+      <span class="title">Pedido en tienda</span>
+    </div>
+    <div class="d-flex align-items-center">
+      <i class="bi bi-credit-card icon ms-3"></i>
+      <i class="bi bi-arrow-clockwise icon ms-3 icon-refresh"></i>
+      <div class="form-check form-switch ms-3 m-0">
+        <input class="form-check-input" type="checkbox" checked>
+      </div>
+    </div>
+  </div>
+  <!-- CONTENIDO -->
+  <div class="container">
+    <div class="container-custom">
+      <!-- BLOQUE DEL RESTAURANTE -->
+      <div class="restaurant-info">
+        <img src="img/1-1723328074126.png" alt="logo">
+        <div class="restaurant-details">
+          <div class="fw-bold" style="font-size:20px;">McDonald's</div>
+          <a href="#">Agregar instrucciones</a>
+        </div>
+      </div>
+      <!-- "Retira el pedido" alineado a la izquierda -->
+      <div class="retira-pedido">
+        <strong>Retira el pedido</strong>
+      </div>
+      <!-- BLOQUE DE INFORMACIÓN DEL PEDIDO -->
+      <div class="pedido-box">
+        <div class="pedido-id">
+          ID pedido: 218102<strong>6697</strong>
+        </div>
+        <div class="pedido-nombre">
+          <strong>Juan david O.</strong>
+        </div>
+        <!-- Fila con "1 producto" y toggle -->
+        <div class="fila-producto">
+          <div class="texto-producto">1 producto</div>
+          <div class="toggle-details" id="toggleDetails">Ver detalle »</div>
+        </div>
+        <!-- Detalles ocultos -->
+        <div class="details-content" id="detailsContent">
+          <hr>
+          <div class="producto-principal">1x Pizza Personal + Bebida 250Ml</div>
+          <div class="producto-secundario">• 1x Pollo champiñón personal</div>
+          <div class="producto-secundario">• 1x Coca-Cola Original 250 ml</div>
+        </div>
+        <!-- Línea separadora y bloque "Pedido en mano" -->
+        <hr class="separador">
+        <div class="pedido-mano">
+          Pedido en mano
+          <span>Confirma que tienes los productos en mano</span>
+        </div>
+        <!-- BOTÓN -->
+        <button class="btn-confirmar" id="btnConfirmar">Tengo el pedido</button>
+      </div>
+    </div>
+    <!-- HORA ACTUAL -->
+    <div class="footer-hora">Hora actual: 11:32:27</div>
+  </div>
+  <!-- FOOTER FIJO (SLIDER) -->
+  <div class="footer-fixed">
+    <div class="slider-container">
+      <div class="slider-track" id="sliderTrack">
+        <div class="slider-fill" id="sliderFill"></div>
+        <div class="slider-text">Ir al domicilio</div>
+        <div class="slider-handle" id="sliderHandle">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- JS: Toggle, Slider y efecto para mantener el botón presionado -->
+  <script>
+    // Toggle para mostrar/ocultar detalles
+    const toggle = document.getElementById('toggleDetails');
+    const details = document.getElementById('detailsContent');
+    toggle.addEventListener('click', () => {
+      const isShown = details.classList.toggle('show');
+      toggle.textContent = isShown ? 'Ocultar detalle »' : 'Ver detalle »';
+    });
+    // Slider "Ir: al domicilio" con redirección
+    (function() {
+      const track = document.getElementById('sliderTrack');
+      const handle = document.getElementById('sliderHandle');
+      const fill = document.getElementById('sliderFill');
+      let maxX = 0;
+      let dragging = false, startX, handleX;
+      function updateMaxX() {
+        maxX = track.clientWidth - handle.clientWidth;
+      }
+      window.addEventListener('resize', updateMaxX);
+      updateMaxX();
+      handle.addEventListener('mousedown', startDrag);
+      handle.addEventListener('touchstart', startDrag, { passive: false });
+      function startDrag(e) {
+        e.preventDefault();
+        dragging = true;
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        handleX = handle.offsetLeft;
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('touchmove', onDrag, { passive: false });
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+        handle.style.cursor = 'grabbing';
+      }
+      function onDrag(e) {
+        if (!dragging) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let dx = clientX - startX;
+        let newX = Math.min(Math.max(0, handleX + dx), maxX);
+        handle.style.left = newX + 'px';
+        fill.style.width = (newX + handle.clientWidth / 2) + 'px';
+      }
+      function endDrag() {
+        dragging = false;
+        handle.style.cursor = 'grab';
+        // Si el deslizador se acerca al final, redirige
+        if (handle.offsetLeft >= maxX * 0.9) {
+          document.getElementById('loadingOverlay').classList.add('active');
+          setTimeout(() => {
+            window.location.href = 'test.html';
+          }, 1500);
+        } else {
+          handle.style.transition = 'left 0.3s';
+          fill.style.transition = 'width 0.3s';
+          handle.style.left = '0px';
+          fill.style.width = '0px';
+          setTimeout(() => {
+            handle.style.transition = '';
+            fill.style.transition = '';
+          }, 300);
+        }
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('touchmove', onDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchend', endDrag);
+      }
+    })();
+    // Mantenimiento del estado "presionado" en el botón "Tengo el pedido"
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    btnConfirmar.addEventListener('mousedown', () => {
+      btnConfirmar.classList.add('pressed');
+    });
+    // El botón se mantiene en estado presionado sin revertir la clase
+  </script>
+</body>
+</html>
